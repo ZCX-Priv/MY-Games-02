@@ -1,0 +1,50 @@
+<html><head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+<title>台球经典赛-双人版</title>
+<style>
+      html,body { background: #000000; }
+   </style>
+       <script src="./config.js"></script>
+<script src="./crazygames.js"></script>
+<script>
+
+      window.famobi_gameID = "8-ball-billiards-classic";
+      window.famobi_gameJS = [
+         "assets/src/01phaser.js",
+         "assets/src/02Ball.js",
+         "assets/src/03contactListener.js",
+         "assets/src/04billiardPhysics.js",
+         "assets/src/05levelData.js",
+         "assets/src/06maths.js",
+         "assets/src/07vector2d.js",
+         "assets/src/08render.js",
+         "assets/src/09sound.js",
+         "assets/src/10effects.js",
+         "assets/src/11timer.js",
+         "assets/src/12load.js",
+         "assets/src/13mainMenu.js",
+         "assets/src/14setup.js",
+         "assets/src/15gameController.js",
+         "assets/src/16boot.js",
+         function() {
+         }
+      ];
+
+      _loadSnippet = function() {
+         (function (document, url, fgJS, firstJS) {
+           fgJS = document.createElement('script');
+           firstJS = document.getElementsByTagName('script')[0];
+           fgJS.src = url + encodeURIComponent(document.location.href);
+           firstJS.parentNode.insertBefore(fgJS, firstJS);
+         })(document, 'html5games/gameapi/v1.js?e=');
+      };
+   </script>
+<link rel="canonical" href="https://www.crazygames.com/game/8-ball-billiards-classic"></head>
+<body class="container">
+<center>
+<div id="mygame"></div>
+</center>
+
+</body></html>

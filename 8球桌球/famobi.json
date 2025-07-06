@@ -1,0 +1,23 @@
+{
+	"features": {
+		"highscores": 1,
+		"credits": 0,
+		"multiplayer_local": 1,
+		"leaderboard": 0,
+		"multiplayer": 0,
+		"rewarded": 0,
+		"standalone": 1
+	},
+	"game_i18n": {},
+	"aid": "A1234-5",
+	"logging": false,
+	"api": "famobi",
+	"name": "CrazyGames",
+	"more_games_url": "",
+	"more_games_button_image": "logo",
+	"show_splash": "",
+	"splash_duration": 3000,
+	"menuless": true,
+	"version": "1e7eb733",
+	"supportedLanguages": []
+}

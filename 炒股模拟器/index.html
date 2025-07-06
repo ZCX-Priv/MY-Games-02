@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炒股模拟器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #eee;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .stock-info {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .stock-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stock-code {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .main-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .price-display {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .price-item.current { border-left-color: #f39c12; }
+        .price-item.buy { border-left-color: #3498db; }
+        .price-item.sell { border-left-color: #e74c3c; }
+        .price-label {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .price-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .change-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
+        .change-up {
+            color: #e74c3c;
+        }
+        .change-down {
+            color: #27ae60;
+        }
+        .capital-info {
+            text-align: center;
+        }
+        .capital-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .profit-loss {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .profit {
+            color: #e74c3c;
+        }
+        .loss {
+            color: #27ae60;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        .sell {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        .sell:hover {
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+        .reset-btn {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .control-btn:hover, .control-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        canvas {
+            width: 100%;
+            height: 350px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .stats-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .transaction-history {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .history-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .history-buy {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid #3498db;
+        }
+        .history-sell {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid #e74c3c;
+        }
+        .statistics {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .stat-value {
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .main-dashboard {
+                grid-template-columns: 1fr;
+            }
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.success {
+            background: #27ae60;
+        }
+        .notification.error {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>炒股模拟器 🚀</h1>
+            <div class="stock-info">
+                <div class="stock-name">腾讯控股</div>
+                <div class="stock-code">HK.00700</div>
+            </div>
+        </div>
+        
+        <div class="main-dashboard">
+            <div class="dashboard-card">
+                <div class="card-title">💰 资产信息</div>
+                <div class="capital-info">
+                    <div class="capital-value">¥<span id="value">10000.00</span></div>
+                    <div class="profit-loss" id="profitLoss">总盈亏: ¥0.00</div>
+                    <div class="action-buttons">
+                        <button id="buysell" onclick="buyOrSell()">买入</button>
+                        <button class="reset-btn" onclick="resetGame()">重置</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-title">📊 价格信息</div>
+                <div class="price-display">
+                    <div class="price-item current">
+                        <span class="price-label">实时价格</span>
+                        <span class="price-value" id="price">¥0.00</span>
+                    </div>
+                    <div class="price-item buy">
+                        <span class="price-label">买入价格</span>
+                        <span class="price-value" id="buyprice">--</span>
+                    </div>
+                    <div class="price-item sell">
+                        <span class="price-label">卖出价格</span>
+                        <span class="price-value" id="sellprice">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-title">📈 涨跌信息</div>
+                <div class="price-display">
+                    <div class="price-item">
+                        <span class="price-label">涨跌幅</span>
+                        <span class="change-indicator" id="changePercent">0.00%</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-label">涨跌额</span>
+                        <span class="change-indicator" id="changeAmount">¥0.00</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-label">持仓状态</span>
+                        <span class="price-value" id="position">空仓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">📊 股价走势图</div>
+                <div class="chart-controls">
+                    <button class="control-btn active" onclick="setSpeed(50)">快速</button>
+                    <button class="control-btn" onclick="setSpeed(100)">正常</button>
+                    <button class="control-btn" onclick="setSpeed(200)">慢速</button>
+                    <button class="control-btn" onclick="togglePause()">暂停</button>
+                </div>
+            </div>
+            <canvas id="wiener_process" width="1000" height="350"></canvas>
+        </div>
+        
+        <div class="stats-section">
+            <div class="transaction-history">
+                <div class="history-title">📋 交易记录</div>
+                <div class="history-list" id="historyList">
+                    <div style="text-align: center; color: #999; padding: 20px;">暂无交易记录</div>
+                </div>
+            </div>
+            
+            <div class="statistics">
+                <div class="history-title">📊 统计信息</div>
+                <div class="stat-item">
+                    <span class="stat-label">交易次数</span>
+                    <span class="stat-value" id="tradeCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">成功率</span>
+                    <span class="stat-value" id="successRate">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">最大盈利</span>
+                    <span class="stat-value" id="maxProfit">¥0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">最大亏损</span>
+                    <span class="stat-value" id="maxLoss">¥0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">平均持仓时间</span>
+                    <span class="stat-value" id="avgHoldTime">0秒</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        // 游戏状态变量
+        let gameState = {
+            capital: 10000,
+            initialCapital: 10000,
+            position: 0, // 0: 空仓, 1: 持仓
+            buyPrice: 0,
+            sellPrice: 0,
+            transactions: [],
+            stats: {
+                tradeCount: 0,
+                successfulTrades: 0,
+                maxProfit: 0,
+                maxLoss: 0,
+                totalHoldTime: 0
+            },
+            holdStartTime: 0,
+            isPaused: false,
+            lastPrice: 250
+        };
+
+        // 正态分布函数
+        function normalDistribution(mean, standardDeviation) {
+            let U1 = 1 - Math.random();
+            let U2 = 1 - Math.random();
+            let R = Math.sqrt(-2 * Math.log(U2));
+            let THETA = 2 * Math.PI * U1;
+            let Z = R * Math.cos(THETA);
+            return mean + (Z * standardDeviation);
+        }
+
+        // 维纳过程
+        function wienerProcess(x, mean, standardDeviation) {
+            return Math.max(1, x + normalDistribution(mean, standardDeviation));
+        }
+
+        // 绘制图表
+        function draw(element, context2d, width, height, arrayDraw) {
+            let dx = width / arrayDraw.length;
+            let max = Math.max(...arrayDraw);
+            let min = Math.min(...arrayDraw);
+            let hei = max - min || 1;
+            
+            // 清空画布
+            context2d.clearRect(0, 0, width, height);
+            
+            // 绘制网格线
+            context2d.beginPath();
+            context2d.strokeStyle = "#ecf0f1";
+            context2d.lineWidth = 1;
+            for(let i = 0; i <= 10; i++) {
+                let y = height * i / 10;
+                context2d.moveTo(0, y);
+                context2d.lineTo(width, y);
+            }
+            for(let i = 0; i <= 20; i++) {
+                let x = width * i / 20;
+                context2d.moveTo(x, 0);
+                context2d.lineTo(x, height);
+            }
+            context2d.stroke();
+            
+            // 绘制价格标签
+            context2d.fillStyle = "#7f8c8d";
+            context2d.font = "12px Arial";
+            for(let i = 0; i <= 5; i++) {
+                let price = min + (max - min) * (5 - i) / 5;
+                let y = height * i / 5;
+                context2d.fillText(price.toFixed(1), 5, y + 15);
+            }
+            
+            // 绘制曲线
+            context2d.beginPath();
+            context2d.strokeStyle = "#3498db";
+            context2d.lineWidth = 3;
+            for (let i = 0; i < arrayDraw.length; i++) {
+                let x = i * dx;
+                let y = height * (1 - (arrayDraw[i] - min) / hei);
+                if (i === 0) {
+                    context2d.moveTo(x, y);
+                } else {
+                    context2d.lineTo(x, y);
+                }
+            }
+            context2d.stroke();
+            
+            // 填充曲线下方区域
+            context2d.beginPath();
+            context2d.fillStyle = "rgba(52, 152, 219, 0.1)";
+            context2d.moveTo(0, height);
+            for (let i = 0; i < arrayDraw.length; i++) {
+                let x = i * dx;
+                let y = height * (1 - (arrayDraw[i] - min) / hei);
+                context2d.lineTo(x, y);
+            }
+            context2d.lineTo(width, height);
+            context2d.closePath();
+            context2d.fill();
+            
+            // 绘制当前价格线
+            let currentY = height * (1 - (arrayDraw[arrayDraw.length - 1] - min) / hei);
+            context2d.beginPath();
+            context2d.strokeStyle = "#e74c3c";
+            context2d.lineWidth = 2;
+            context2d.setLineDash([5, 5]);
+            context2d.moveTo(0, currentY);
+            context2d.lineTo(width, currentY);
+            context2d.stroke();
+            context2d.setLineDash([]);
+        }
+
+        // 游戏参数
+        let points = 400;
+        var delayTime = 100;
+        var generate = 1;
+        var sequence = [250];
+        
+        // 初始化价格序列
+        for (let i = 1; i < points; i++) { 
+            sequence[i] = wienerProcess(sequence[i - 1], 0, 2);
+        }
+        
+        // DOM元素
+        var element = document.getElementById("wiener_process");
+        var context2d = element.getContext("2d");
+        var buyPriceElement = document.getElementById("buyprice");
+        var sellPriceElement = document.getElementById("sellprice");
+        var priceElement = document.getElementById("price");
+        var valueElement = document.getElementById("value");
+        var button = document.getElementById("buysell");
+        var profitLossElement = document.getElementById("profitLoss");
+        var changePercentElement = document.getElementById("changePercent");
+        var changeAmountElement = document.getElementById("changeAmount");
+        var positionElement = document.getElementById("position");
+        
+        // 更新UI
+        function updateUI() {
+            let currentPrice = sequence[sequence.length - 1];
+            priceElement.innerText = "¥" + currentPrice.toFixed(2);
+            valueElement.innerText = gameState.capital.toFixed(2);
+            
+            // 计算盈亏
+            let totalProfitLoss = gameState.capital - gameState.initialCapital;
+            profitLossElement.innerText = `总盈亏: ¥${totalProfitLoss.toFixed(2)}`;
+            profitLossElement.className = "profit-loss " + (totalProfitLoss >= 0 ? "profit" : "loss");
+            
+            // 计算涨跌
+            let priceChange = currentPrice - gameState.lastPrice;
+            let changePercent = (priceChange / gameState.lastPrice * 100);
+            changePercentElement.innerText = (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
+            changeAmountElement.innerText = (priceChange >= 0 ? "+¥" : "-¥") + Math.abs(priceChange).toFixed(2);
+            
+            changePercentElement.className = "change-indicator " + (priceChange >= 0 ? "change-up" : "change-down");
+            changeAmountElement.className = "change-indicator " + (priceChange >= 0 ? "change-up" : "change-down");
+            
+            // 更新持仓状态
+            positionElement.innerText = gameState.position === 0 ? "空仓" : "持仓";
+            
+            // 更新统计信息
+            updateStats();
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById("tradeCount").innerText = gameState.stats.tradeCount;
+            let successRate = gameState.stats.tradeCount > 0 ? 
+                (gameState.stats.successfulTrades / gameState.stats.tradeCount * 100).toFixed(1) : 0;
+            document.getElementById("successRate").innerText = successRate + "%";
+            document.getElementById("maxProfit").innerText = "¥" + gameState.stats.maxProfit.toFixed(2);
+            document.getElementById("maxLoss").innerText = "¥" + gameState.stats.maxLoss.toFixed(2);
+            
+            let avgHoldTime = gameState.stats.tradeCount > 0 ? 
+                (gameState.stats.totalHoldTime / gameState.stats.tradeCount / 1000).toFixed(1) : 0;
+            document.getElementById("avgHoldTime").innerText = avgHoldTime + "秒";
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            let notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 添加交易记录
+        function addTransactionHistory(type, price, profit = null) {
+            let time = new Date().toLocaleTimeString();
+            let historyList = document.getElementById('historyList');
+            
+            // 清空"暂无记录"提示
+            if (gameState.transactions.length === 0) {
+                historyList.innerHTML = '';
+            }
+            
+            let historyItem = document.createElement('div');
+            historyItem.className = `history-item history-${type}`;
+            
+            let profitText = profit !== null ? ` (${profit >= 0 ? '+' : ''}¥${profit.toFixed(2)})` : '';
+            historyItem.innerHTML = `
+                <span>${type === 'buy' ? '买入' : '卖出'} ¥${price.toFixed(2)}${profitText}</span>
+                <span>${time}</span>
+            `;
+            
+            historyList.insertBefore(historyItem, historyList.firstChild);
+            
+            // 保持最多10条记录
+            while (historyList.children.length > 10) {
+                historyList.removeChild(historyList.lastChild);
+            }
+            
+            gameState.transactions.push({type, price, time, profit});
+        }
+        
+        // 主循环
+        function delayIncr() {
+            if (gameState.isPaused) {
+                setTimeout(delayIncr, delayTime);
+                return;
+            }
+            
+            let len = sequence.length;
+            for (let i = 0; i < generate; i++) {
+                let newPrice = wienerProcess(sequence[len - 1], 0, 2);
+                sequence.push(newPrice);
+                sequence.shift();
+            }
+            
+            draw(element, context2d, element.width, element.height, sequence);
+            updateUI();
+            gameState.lastPrice = sequence[sequence.length - 1];
+            
+            setTimeout(delayIncr, delayTime);
+        }
+        
+        // 买入/卖出功能
+        function buyOrSell() {
+            let currentPrice = sequence[sequence.length - 1];
+            
+            if (gameState.position === 0) { // 买入
+                if (gameState.capital < currentPrice) {
+                    showNotification('资金不足，无法买入！', 'error');
+                    return;
+                }
+                
+                gameState.position = 1;
+                gameState.buyPrice = currentPrice;
+                gameState.capital -= currentPrice;
+                gameState.holdStartTime = Date.now();
+                
+                buyPriceElement.innerText = "¥" + currentPrice.toFixed(2);
+                sellPriceElement.innerText = "--";
+                button.innerText = "卖出";
+                button.classList.add("sell");
+                
+                addTransactionHistory('buy', currentPrice);
+                showNotification(`成功买入，价格：¥${currentPrice.toFixed(2)}`);
+                
+            } else { // 卖出
+                gameState.position = 0;
+                gameState.sellPrice = currentPrice;
+                gameState.capital += currentPrice;
+                
+                let profit = currentPrice - gameState.buyPrice;
+                let holdTime = Date.now() - gameState.holdStartTime;
+                
+                // 更新统计
+                gameState.stats.tradeCount++;
+                gameState.stats.totalHoldTime += holdTime;
+                
+                if (profit > 0) {
+                    gameState.stats.successfulTrades++;
+                    if (profit > gameState.stats.maxProfit) {
+                        gameState.stats.maxProfit = profit;
+                    }
+                } else {
+                    if (Math.abs(profit) > Math.abs(gameState.stats.maxLoss)) {
+                        gameState.stats.maxLoss = profit;
+                    }
+                }
+                
+                sellPriceElement.innerText = "¥" + currentPrice.toFixed(2);
+                button.innerText = "买入";
+                button.classList.remove("sell");
+                
+                addTransactionHistory('sell', currentPrice, profit);
+                showNotification(`成功卖出，价格：¥${currentPrice.toFixed(2)}，盈亏：${profit >= 0 ? '+' : ''}¥${profit.toFixed(2)}`);
+            }
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            if (confirm('确定要重置游戏吗？所有数据将被清空！')) {
+                gameState = {
+                    capital: 10000,
+                    initialCapital: 10000,
+                    position: 0,
+                    buyPrice: 0,
+                    sellPrice: 0,
+                    transactions: [],
+                    stats: {
+                        tradeCount: 0,
+                        successfulTrades: 0,
+                        maxProfit: 0,
+                        maxLoss: 0,
+                        totalHoldTime: 0
+                    },
+                    holdStartTime: 0,
+                    isPaused: false,
+                    lastPrice: 250
+                };
+                
+                // 重置价格序列
+                sequence = [250];
+                for (let i = 1; i < points; i++) { 
+                    sequence[i] = wienerProcess(sequence[i - 1], 0, 2);
+                }
+                
+                // 重置UI
+                buyPriceElement.innerText = "--";
+                sellPriceElement.innerText = "--";
+                button.innerText = "买入";
+                button.classList.remove("sell");
+                
+                // 清空交易记录
+                document.getElementById('historyList').innerHTML = 
+                    '<div style="text-align: center; color: #999; padding: 20px;">暂无交易记录</div>';
+                
+                updateUI();
+                showNotification('游戏已重置！');
+            }
+        }
+        
+        // 设置速度
+        function setSpeed(speed) {
+            delayTime = speed;
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        // 暂停/继续
+        function togglePause() {
+            gameState.isPaused = !gameState.isPaused;
+            event.target.innerText = gameState.isPaused ? '继续' : '暂停';
+            showNotification(gameState.isPaused ? '游戏已暂停' : '游戏继续');
+        }
+        
+        // 初始化
+        updateUI();
+        draw(element, context2d, element.width, element.height, sequence);
+        setTimeout(delayIncr, delayTime);
+    </script>
+</body>
+</html>
